@@ -125,24 +125,64 @@ Figure 14 shows the training section of main.cu file where the training time has
  
 Figure 14: main.cu: training and timing
 After training the accuracy of the model has been estimated by calculating the total number of correct predictions using the cumputeAccuracy function, as depicted in figure 15. 
- 
+
+![image](https://user-images.githubusercontent.com/57262710/218337415-b858f4de-b66c-4a77-aee2-d76431a16a5e.png)
+
 Figure 15: main.cu: computing the accuracy of the model
+
 Figure 16 illustrates the computeAccuracy function. This function receives the target and predicted labels into batches and sees if the maximum number in the output array of the network matches with the index of the target array, which is 1. If this condition is true, it adds one number to corrected predictions, and when it is done with this batch calculations, it returns the number of corrected predictions.
+
+![image](https://user-images.githubusercontent.com/57262710/218337429-b746b4f3-9ad5-4250-a657-7f77c26bbff5.png)
  
 Figure 16: main.cu: computeAccuracy function
-5	Results
+## 5 -	Results
 In previous sections, we have seen detailed information about the network and its implementation using CUDA programming. This section provides the results of the code and compares them to the results of the same implementation of the network in Pytorch. You can find the python code of the PyTorch model in the mnist.py file.
 The networks are trained using 5 epochs. Figure 17 shows the output of the written code in the command window. As can be seen, the training cost continuously decreased during the training processes, and finally, 88.67 % of accuracy was achieved in this run, which took around 209 s. Furthermore, 10 outputs of the network with corresponding labels have been printed in the command window (each column shows one output and one target). Interestingly, the model could successfully predict the correct labels in these ten samples as the output has the highest value (highest probability if we pass the output from the softmax function) in the index at which the target is one.
 
  
+![image](https://user-images.githubusercontent.com/57262710/218337464-2851d1bb-a09d-4e17-b53f-4c8f41b49887.png)
+ 
+![image](https://user-images.githubusercontent.com/57262710/218337506-6d3ef059-0234-4965-847f-01ea4c686d9d.png)
  
 Figure 17: Training and test results of the network in c++
 The same network was trained using PyTorch with the same data, cost function, learning rate, and batch size, and figure 18 shows the result. Compared to CUDA implementation in c++, the PyTorch model took around one-fourth time to train, but its accuracy is lesser by around 12% in the same number of epochs.
 
  
- 
+![image](https://user-images.githubusercontent.com/57262710/218337594-80b233f9-3353-4530-9855-40d36ddb66da.png)
+![image](https://user-images.githubusercontent.com/57262710/218337599-6ec68b58-3d88-418a-9347-ead4e99c0b1e.png)
+
 Figure 18: Training and test results of the pytorch implementation of the network in python
 Finally, both networks in c++ and python were trained using 30 epochs (you can find the loss of each epoch in the two attached .txt files), and the results are tabulated in table 1. Regarding table 1, the accuracy of the CUDA code is more than the PyTorch, but the training time is roughly four times more than the PyTorch model in python. 
 
+Table 1: CUDA c++ vs. Pytorch python implementation of the network
+|                        |     5 epochs    |                      |     30 epochs    |                      |   |
+|------------------------|-----------------|----------------------|------------------|----------------------|---|
+|                        |     Accuracy    |     Training time    |     Accuracy     |     Training time    |   |
+|     C++, CUDA          |     88.67 %     |     209.23 s         |     93.8 %       |     20 min, 54 s     |   |
+|     Python, Pytorch    |     76.63 %     |     54 s             |     89.67 %      |     5 min, 19 s      |   |  
   
+CUDA c++ code was also run with different block sizes to evaluate the effect of the block size on training time and accuracy. Table 2 shows the accuracy and training time of the network for five epochs with different block sizes of threads with 1D and 2D configurations. Regarding Table 2, it seems that the optimum block size for this problem and my hardware is 256 for 1D and 8×8 for 2D thread configuration. When the block size was changed to 4×4, the training time significantly increased. It is because of the fact that the blocks are dispatched in wraps (the wrap size of my GPU, which is NVIDIA Geforce 940MX, is 32), and with 16 threads per block, we aren’t using SIMD instruction within the streaming multiprocessing [4]. The accuracy of computation also remained the same, which makes sense since the computation and random weights are the same in all runs.
+
+Table 2: Accuracy and training time of the model for 5 epochs with different block sizes
+|          |     1D Threads    |     2D Threads     |     Accuracy    |     Training time    |
+|----------|-------------------|--------------------|-----------------|----------------------|
+|     1    |     128           |     16×16          |     88.67       |     219.29 s         |
+|     2    |     256           |     16×16          |     88.67       |     219.76 s         |
+|     3    |     256           |     8×8            |     88.67       |     209.23 s         |
+|     4    |     128           |     8×8            |     88.67       |     209.67 s         |
+|     5    |     256           |     4×4            |     88.67       |     397.07 s         |
+
+## 6	- Conclusion
+In this project, a simple fully connected neural network with one hidden layer was developed in c++ using CUDA processing for MNIST dataset classification. The accuracy of the developed model was more than the PyTorch implementation of the same network with the same parameters and hyperparameters. However, it was seen that the training of the CUDA-implemented model took around four times more than the PyTorch model to train, although the PyTorch model was run in the python programming environment. The reason can be not optimized code or not using CUDA shared memory computation. Since the compute-to-global-memory access ratio in all written CUDA kernels was 1, there is obviously still room for making the model run faster by further optimizing the developed code or using shared memory processing rather than global memory computation.
+
+
+
+
+
+
+References
+[1] DeepLearning.AI coursera lecture notes, Improving Deep Neural Networks: Hyperparameter tuning, Regularization and Optimization, Andrew Ng, https://community.deeplearning.ai/uploads/short-url/bvDEh8h6bowXxp1zR52Lq9Yixkb.pdf
+[2] DeepLearning.AI coursera lecture notes, Neural network and deep learning, Andrew Ng, https://community.deeplearning.ai/uploads/short-url/oX89NdmWTEbvVGhuLmkRUtIQ00y.pdf
+[3] https://arxiv.org/pdf/1502.01852.pdf 
+[4] Parallel Processing lecture notes, Prof. Ian Jeffrey, fall 2022.
   
