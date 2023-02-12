@@ -155,11 +155,11 @@ Figure 18: Training and test results of the pytorch implementation of the networ
 Finally, both networks in c++ and python were trained using 30 epochs (you can find the loss of each epoch in the two attached .txt files), and the results are tabulated in table 1. Regarding table 1, the accuracy of the CUDA code is more than the PyTorch, but the training time is roughly four times more than the PyTorch model in python. 
 
 Table 1: CUDA c++ vs. Pytorch python implementation of the network
-|                        |     5 epochs    |                      |     30 epochs    |                      |   |
-|------------------------|-----------------|----------------------|------------------|----------------------|---|
-|                        |     Accuracy    |     Training time    |     Accuracy     |     Training time    |   |
-|     C++, CUDA          |     88.67 %     |     209.23 s         |     93.8 %       |     20 min, 54 s     |   |
-|     Python, Pytorch    |     76.63 %     |     54 s             |     89.67 %      |     5 min, 19 s      |   |  
+|                        |     5 epochs    |                      |     30 epochs    |                      |
+|------------------------|-----------------|----------------------|------------------|----------------------|
+|                        |     Accuracy    |     Training time    |     Accuracy     |     Training time    | 
+|     C++, CUDA          |     88.67 %     |     209.23 s         |     93.8 %       |     20 min, 54 s     |
+|     Python, Pytorch    |     76.63 %     |     54 s             |     89.67 %      |     5 min, 19 s      |
   
 CUDA c++ code was also run with different block sizes to evaluate the effect of the block size on training time and accuracy. Table 2 shows the accuracy and training time of the network for five epochs with different block sizes of threads with 1D and 2D configurations. Regarding Table 2, it seems that the optimum block size for this problem and my hardware is 256 for 1D and 8×8 for 2D thread configuration. When the block size was changed to 4×4, the training time significantly increased. It is because of the fact that the blocks are dispatched in wraps (the wrap size of my GPU, which is NVIDIA Geforce 940MX, is 32), and with 16 threads per block, we aren’t using SIMD instruction within the streaming multiprocessing [4]. The accuracy of computation also remained the same, which makes sense since the computation and random weights are the same in all runs.
 
@@ -180,9 +180,12 @@ In this project, a simple fully connected neural network with one hidden layer w
 
 
 
-References
+### References
 [1] DeepLearning.AI coursera lecture notes, Improving Deep Neural Networks: Hyperparameter tuning, Regularization and Optimization, Andrew Ng, https://community.deeplearning.ai/uploads/short-url/bvDEh8h6bowXxp1zR52Lq9Yixkb.pdf
+
 [2] DeepLearning.AI coursera lecture notes, Neural network and deep learning, Andrew Ng, https://community.deeplearning.ai/uploads/short-url/oX89NdmWTEbvVGhuLmkRUtIQ00y.pdf
+
 [3] https://arxiv.org/pdf/1502.01852.pdf 
+
 [4] Parallel Processing lecture notes, Prof. Ian Jeffrey, fall 2022.
   
