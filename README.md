@@ -107,12 +107,20 @@ As explained in previous sections, the categorical cross entropy (CCE) loss is u
 Figure 11: CCE cost forward
 
 The backward pass of CCE cost, shown in figure 12, actually implements equation (9) with softmax calculation. It should be noted that we do not need synchronization in these two kernels as each thread just computes the cost and derivative of cost for one single output of the network.
- 
+
+![image](https://user-images.githubusercontent.com/57262710/218329534-0593dafe-27fe-4731-a306-a2a9fe6bbf0a.png)
+
 Figure 12: CCE cost backprob
-4.6	Building the network and main function
+
+### 4.6	- Building the network and main function
 In the main.cu file, first necessary libraries are included. Then the dataset is read from two separate .txt file followed by creating the train and test dataset from these raw data, as illustrated in figure 13. In line 68, the cost object is created, and lines 70 to 73 are devoted to creating the network. As can be seen, any number of layers or any kind of activation functions can be added to the network, just as shown in figure 13. The main limitation of this implementation is that we can only create sequential layers, and it is not possible to use recent deep learning techniques like skip connections.
- 
+
+![image](https://user-images.githubusercontent.com/57262710/218329550-9d149d88-88a8-4af2-9055-3118398b7e44.png)
+
 Figure 13: main.cu: dataset, cost, and model development
+
+![image](https://user-images.githubusercontent.com/57262710/218329565-4572a5de-a771-49d4-9016-b40a75e4631a.png)
+
 Figure 14 shows the training section of main.cu file where the training time has been calculated just like taught in the class [4]. 
  
 Figure 14: main.cu: training and timing
